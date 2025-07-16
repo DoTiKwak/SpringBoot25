@@ -1,0 +1,71 @@
+<!DOCTYPE html> <html xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8">
+  <title>리스트 사용해보기</title>
+</head>
+<body>
+<h4> [[${list}]]</h4>
+<hr>
+
+<h4 th:text="${list}"> </h4>
+
+<hr>
+<div th:width="num1 = ${10}, num2 = ${20}">
+  <h4 th:text="${num1 + num2}"></h4>
+</div>
+
+<hr>
+<!-- 반복문 처리 방법 list -->
+<!-- 반복이 필요한 캐그에 th:each를 (향상된 for) 적용 -->
+<ul>
+  <li th:each="str:${list}" th:text="${str}"></li>
+</ul> <!-- 태그 안에 속성값으로 반복문 사용 -->
+
+<!-- thL:block 별도의 태그로 사용도 가능 -->
+<ul>
+  <th:block th:each="str:${list}">
+    <li>[[${str}]]</li>
+  </th:block>
+</ul>
+
+<!-- 반복문에서 상태값을 가지고 있는 특수기능 -->
+<!-- th:each를 처리할 때 내부 상태에 변수를 추가해서 사용가능 -->
+<!-- status 변수 -> index/count/size/first/lost/odd/even 값을 사용가능 -->
+<ul>
+  <li th:each="str,status:${list}">
+    status.index           리스트의 값<br>
+    [[${status.count}]] -- [[${str}]]
+  </li>
+</ul>
+
+<hr>
+<!-- if문과 홀짝용 태그를 이용해 표현 -->
+<ul>
+  <li th:each="str,status:${list}">
+    <span th:if="${status.odd}">[[${status.index}]] 홀수 --- [[${str}]]</span>
+    <span th:unless="${status.odd}">[[${status.index}]] 짝수 --- [[${str}]]</span>
+  </li>
+</ul>
+
+<ul>
+  <li th:each="str,status:${list}">
+    <span th:text="${status.odd} ? '홀수---'+${str} : '거짓' "></span>
+</ul>
+
+<ul>
+  <li th:each="str,status:${list}">
+    <th:block th:switch="${status.index %3 }"> <!-- 인덱스를 3으로 나누었을 때 나머지 값 -->
+      <span th:case="0"> 인덱스를 3으로 나누었을 때 나머지가 0입니다. </span>
+    </th:block>
+  </li>
+</ul>
+
+<!-- 타임리프 링크 처리 -->
+<!-- jsp는 링크 처리할 때 톰캣이 컨텍스트 루트를 프로젝트 명으로 생성하기 때문에 많은 문제가 있다. -->
+<!-- @로 링크를 작성하기만 하면 컨텍스트 루트를 알아온다. -->
+<a th:href="@{/hello}">컨트롤러에서 hello 경로를 찾는다.</a>
+
+<a th:href="@{/hello(name='김기원',age=33)}">클릭 후 URL을 확인하세요!!</a>
+<br>
+
+<a th:href="@{/hello(types=${{'요리사', '건축가', '운동선수', '선생님'}},age=33)}">클릭 후 url 확인</a>
+</body>
+</html>
