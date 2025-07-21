@@ -3,6 +3,8 @@ package service;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.mbc.board.dto.BoardDTO;
+import org.mbc.board.dto.PageRequestDTO;
+import org.mbc.board.dto.PageResponseDTO;
 import org.mbc.board.service.BoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,6 +43,22 @@ public class BoardServiceTests {
                 .content("서비스에서 수정된 내용")
                 .build();
         boardService.modify(boardDTO); // 프론트에서 객체가 넘어가 수정이 되었는지 테스트
+
+    }
+
+    @Test
+    public void testList(){
+        // 프론트에서 넘어오는 데이터를 이용해서 페이징과 검색과 정렬 처리용
+        PageRequestDTO pageRequestDTO = PageRequestDTO.builder()
+                .type("tcw")
+                .keyword("1")
+                .page(1)
+                .size(10)
+                .build();
+
+        PageResponseDTO<BoardDTO> responseDTO = boardService.list(pageRequestDTO);
+
+        log.info(responseDTO);
 
     }
 

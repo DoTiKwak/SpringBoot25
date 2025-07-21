@@ -4,12 +4,18 @@ import groovy.util.logging.Log4j2;
 import lombok.RequiredArgsConstructor;
 import org.mbc.board.domain.Board;
 import org.mbc.board.dto.BoardDTO;
+import org.mbc.board.dto.PageRequestDTO;
+import org.mbc.board.dto.PageResponseDTO;
 import org.mbc.board.repository.BoardRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service // 스프링에게 서비스 계층임을 알린다.
 @Log4j2
@@ -21,7 +27,7 @@ public class BoardServiceImpl implements BoardService {
     private final BoardRepository boardRepository; // jpa용 클래스 (CURD, 페이징, 정렬, 다중검색)
     
     @Override
-    public Long register(BoardDTO boardDTO) {  // 조원이 실행코드를 만든다.
+    public Long register(BoardDTO boardDTO) {
         // 폼에서 넘어온 DTO가 데이터베이스에 기록되어야 함.
 
         Board board = modelMapper.map(boardDTO, Board.class); // 엔티티가 dto로 변환
@@ -63,5 +69,28 @@ public class BoardServiceImpl implements BoardService {
     public void remove(Long bno) {
         boardRepository.deleteById(bno);
         // delete from board where bno = bno
+    }
+
+    @Override // 리스트 페이지에서 요청 온 값으로 응답을 보낸다. (페이징 처리)
+    public PageResponseDTO<BoardDTO> list(PageRequestDTO pageRequestDTO) {
+        // PageRequestDTO에서 넘어온 값을 처리하고 PageResponseDTO로 보내야 한다.
+
+        String[] types = pageRequestDTO.getTypes(); // 프론트에서 넘어온 type t,c,w처리
+        String keyword = pageRequestDTO.getKeyword(); // 프론트에서 넘어온 검색 단어처리
+        Pageable pageable = pageRequestDTO.getPageable("bno"); // 프론트에서 넘어온 bno를 이용한 정렬 처리용
+        // return PageRequest.of(this.page-1, this.size, Sort.by(props).descending());
+
+        // Page<Board> -> Lisst<BoardDTO> 변환하고 리턴 되어야 한다.
+        Page<Board> result = boardRepository.searchAll(types, keyword, pageable);
+
+        List<BoardDTO> dtoList = result.getContent().stream()
+                .map(board -> modelMapper.map(board,BoardDTO.class))
+                .collect(Collectors.toList());
+
+        return PageResponseDTO.<BoardDTO>withAll()
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(dtoList)
+                .total((int)result.getTotalElements())
+                .build();
     }
 }

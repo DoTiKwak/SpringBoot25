@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">  <!--타입리프와 레이아웃용 코드 필수 -->
+
+<div layout:fragment="content">
+  <!-- <h1> 게시판 리스트 페이지 </h1>-->
+  <div class="row mt-3">
+    <div class="col">
+      <div class="card">
+        <div class="card-header">
+          게시판 리스트 페이지
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Board List</h5>
+          <!-- 테이블 영역 -->
+          <table class="table">
+            <thead>
+            <tr>
+            <th scope="col">bno</th>
+            <th scope="col">제목</th>
+            <th scope="col">작성자</th>
+            <th scope="col">등록일</th>
+            </tr>
+            </thead> <!-- 테이블 제목 끝 -->
+
+            <tbody> <!-- 표 본문 영역 -->
+            <tr th:each="dto:${responseDTO.dtoList}"> <!-- 배열로 받은 객체를 한 개씩 꺼내어 DTO로 넣는다 -->
+              <th scope="row">[[${dto.bno}]]</th> <!--번호-->
+              <td>[[${dto.bno}]]</td>
+              <td>[[${dto.title}]]</td>
+              <td>[[${dto.writer}]]</td>
+              <td>[[${dto.regDate}]]</td>
+            </tr>
+
+            </tbody>
+
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script layout:fragment="script" th:inline="javascript">
+
+  console.log("자바스크립트 fragment 테스트....")
+</script>
