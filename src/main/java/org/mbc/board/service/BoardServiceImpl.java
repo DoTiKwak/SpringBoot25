@@ -1,9 +1,11 @@
 package org.mbc.board.service;
 
+import groovy.transform.ASTTest;
 import groovy.util.logging.Log4j2;
 import lombok.RequiredArgsConstructor;
 import org.mbc.board.domain.Board;
 import org.mbc.board.dto.BoardDTO;
+import org.mbc.board.dto.BoardListReplyCountDTO;
 import org.mbc.board.dto.PageRequestDTO;
 import org.mbc.board.dto.PageResponseDTO;
 import org.mbc.board.repository.BoardRepository;
@@ -27,7 +29,7 @@ public class BoardServiceImpl implements BoardService {
     private final BoardRepository boardRepository; // jpa용 클래스 (CURD, 페이징, 정렬, 다중검색)
     
     @Override
-    public Long register(BoardDTO boardDTO) {
+    public Long register(BoardDTO boardDTO) {  // 조원이 실행코드를 만든다.
         // 폼에서 넘어온 DTO가 데이터베이스에 기록되어야 함.
 
         Board board = modelMapper.map(boardDTO, Board.class); // 엔티티가 dto로 변환
@@ -71,26 +73,47 @@ public class BoardServiceImpl implements BoardService {
         // delete from board where bno = bno
     }
 
-    @Override // 리스트 페이지에서 요청 온 값으로 응답을 보낸다. (페이징 처리)
+    @Override  // 리스트 페이지 요청에 온 값을 응답을 보낸다 (페이징 처리)
     public PageResponseDTO<BoardDTO> list(PageRequestDTO pageRequestDTO) {
         // PageRequestDTO에서 넘어온 값을 처리하고 PageResponseDTO로 보내야 한다.
 
-        String[] types = pageRequestDTO.getTypes(); // 프론트에서 넘어온 type t,c,w처리
-        String keyword = pageRequestDTO.getKeyword(); // 프론트에서 넘어온 검색 단어처리
-        Pageable pageable = pageRequestDTO.getPageable("bno"); // 프론트에서 넘어온 bno를 이용한 정렬 처리용
-        // return PageRequest.of(this.page-1, this.size, Sort.by(props).descending());
+        String[] types = pageRequestDTO.getTypes(); //프론트에 넘어온 type t,c,w 처리
+        String keyword = pageRequestDTO.getKeyword(); // 프론트에서 넘어온 검색단어 처리
+        Pageable pageable = pageRequestDTO.getPageable("bno");  //프론트에서 넘어온 bno를 이용한 정렬 처리용
+        //  return PageRequest.of(this.page-1, this.size, Sort.by(props).descending());
 
-        // Page<Board> -> Lisst<BoardDTO> 변환하고 리턴 되어야 한다.
+        // Page<Board> -> List<BoardDTO> 변환하고 리턴 되어야 한다.
         Page<Board> result = boardRepository.searchAll(types, keyword, pageable);
+        // 테스트에서 해봤던 코드
 
-        List<BoardDTO> dtoList = result.getContent().stream()
-                .map(board -> modelMapper.map(board,BoardDTO.class))
-                .collect(Collectors.toList());
+        List<BoardDTO> dtoList = result.getContent().stream() // stream() 바이트가 전달되는 기법
+                .map(board -> modelMapper.map(board,BoardDTO.class)) // 모델메퍼로 엔티티가 dto 변환
+                .collect(Collectors.toList()); //Collectors.toList() 리스트로 변환
+        // 엔티티를 dto로 변환하는 코드 
 
         return PageResponseDTO.<BoardDTO>withAll()
                 .pageRequestDTO(pageRequestDTO)
                 .dtoList(dtoList)
                 .total((int)result.getTotalElements())
-                .build();
+                .build(); // 빌더패턴을 이용해서 리턴할 때 사용함.
     }
+
+    @Override
+    public PageResponseDTO<BoardListReplyCountDTO> listWithReplyCount(PageRequestDTO pageRequestDTO) {
+
+        String[] types = pageRequestDTO.getTypes();
+        String keyword = pageRequestDTO.getKeyword();
+        Pageable pageable = pageRequestDTO.getPageable("bno");
+
+        Page<BoardListReplyCountDTO> result = boardRepository.
+                searchWithReplyCount(types, keyword, pageable);
+
+        return PageResponseDTO.<BoardListReplyCountDTO>withAll()
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(result.getContent())
+                .total((int)result.getTotalElements())
+                .build();
+        // 리스트 페이지에 페이징처리, 정렬, 게시판의리스트, 댓글의 개수가 리턴됨!
+    }
+
 }

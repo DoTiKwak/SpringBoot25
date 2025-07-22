@@ -2,6 +2,7 @@ package org.mbc.board.service;
 
 import org.mbc.board.domain.Board;
 import org.mbc.board.dto.BoardDTO;
+import org.mbc.board.dto.BoardListReplyCountDTO;
 import org.mbc.board.dto.PageRequestDTO;
 import org.mbc.board.dto.PageResponseDTO;
 
@@ -16,8 +17,10 @@ public interface BoardService {
     void modify(BoardDTO boardDTO); // 프론트에서 dto가 넘어오면 수정 작업
 
     void remove(Long bno); // 프론트에서 bno가 넘어오면 삭제 작업 진행
-    
+
     PageResponseDTO<BoardDTO> list(PageRequestDTO pageRequestDTO);
-    // 페이징 처리에 대한 요청을 리스트로 처리하고 결과를 응답으로 보내는 메서드
-    
+    // 페이징 처리에 대한 요청을 리스트로 처리하고 결과를 응답으로 보내는 메서드!!!
+
+    // p547 페이징 + 정렬 + 댓글 수 추가
+    PageResponseDTO<BoardListReplyCountDTO> listWithReplyCount(PageRequestDTO pageRequestDTO);
 }
